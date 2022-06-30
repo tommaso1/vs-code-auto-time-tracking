@@ -19,6 +19,14 @@
 			{
 				"command": "auto-time-tracker.openReport",
 				"title": "Open Report"
+			},
+			{
+				"command": "auto-time-tracker.openReportRaw",
+				"title": "Open Report Raw"
+			},
+			{
+				"command": "auto-time-tracker.openReportDetailed",
+				"title": "Open Report Detailed"
 			}
 		]
 	},
