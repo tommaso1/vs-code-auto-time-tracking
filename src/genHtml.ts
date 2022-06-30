@@ -29,7 +29,7 @@ function genList(key: string, records: Entry[]) {
 function genEntryView(entry: Entry) {
 	return `
 	<li>
-		${(new Date(entry.startedAt)).toLocaleString()} - ${(new Date(entry.closedAt)).toLocaleString()}
+		${(new Date(entry.startedAt)).toLocaleString()} - ${(new Date(entry.closedAt)).toLocaleString()}${entry.filename ? (' -' + entry.filename) : ''}
 	</li>
 `;
 }

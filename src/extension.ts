@@ -1,9 +1,10 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { Dictionary, groupBy } from 'lodash';
+import { groupBy, last } from 'lodash';
 import { genWebviewContent } from './genHtml';
 import { Entry } from './entry';
+import { sep } from 'path';
 
 
 // this method is called when your extension is activated
@@ -43,25 +44,26 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 	let workSpaceOpenedAt = new Date();
-	let workSpaceClosedAt = new Date();
 	let currentWorkspace = vscode.workspace.name;
+	let activeFileName = getActiveFileName();
+
 
 	let interval = setInterval(() => {
 
-		if (vscode.workspace.name !== currentWorkspace) {
-			// chiudo la time entry
-			vscode.window.showInformationMessage(`Stop tracking of: ${vscode.workspace.name}`);
+		if (vscode.workspace.name !== currentWorkspace || getActiveFileName() !== activeFileName) {
 			currentWorkspace = vscode.workspace.name;
+			activeFileName = getActiveFileName();
 			workSpaceOpenedAt = new Date();
-			workSpaceClosedAt = new Date();
 			return;
 		}
 
-		workSpaceClosedAt = new Date();
-		context.globalState.update(`${currentWorkspace} - ${workSpaceOpenedAt.toISOString()}`, {
+		const storageKey = `${currentWorkspace} - ${workSpaceOpenedAt.toISOString()} - ${activeFileName}`;
+
+		context.globalState.update(storageKey, {
 			workspace: currentWorkspace,
 			startedAt: workSpaceOpenedAt.toISOString(),
-			closedAt: workSpaceClosedAt.toISOString()
+			closedAt: new Date().toISOString(),
+			filename: activeFileName,
 		});
 
 	}, 5000);
@@ -80,4 +82,8 @@ export function activate(context: vscode.ExtensionContext) {
 // this method is called when your extension is deactivated
 export function deactivate() {
 	console.log("Extension deactivated");
+}
+
+function getActiveFileName() {
+	return last(vscode.window.activeTextEditor?.document?.fileName?.split(sep) ?? ['unsaved file']);
 }
