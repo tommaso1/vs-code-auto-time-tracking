@@ -3,7 +3,7 @@
 	"displayName": "auto-time-tracker",
 	"description": "Automatically track your time on vs code",
 	"repository": "https://github.com/tommaso1/vs-code-auto-time-tracking",
-	"version": "0.0.3",
+	"version": "0.0.5",
 	"engines": {
 		"vscode": "^1.68.0"
 	},
@@ -27,6 +27,18 @@
 			{
 				"command": "auto-time-tracker.openReportDetailed",
 				"title": "Open Report Detailed"
+			},
+			{
+				"command": "auto-time-tracker.pauseTracking",
+				"title": "Pause Tracking"
+			},
+			{
+				"command": "auto-time-tracker.resumeTracking",
+				"title": "Resume Tracking"
+			},
+			{
+				"command": "auto-time-tracker.clearStorage",
+				"title": "Clear tracker storage"
 			}
 		]
 	},

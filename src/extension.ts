@@ -20,6 +20,8 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage(`Tracking ${vscode.workspace.name}`);
 	}
 
+	let paused = false;
+
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
@@ -27,60 +29,82 @@ export function activate(context: vscode.ExtensionContext) {
 	let disposables = [
 		vscode.commands.registerCommand('auto-time-tracker.openReport', () => {
 
-		vscode.window.showInformationMessage("Generating Report");
+			vscode.window.showInformationMessage("Generating Report");
 
-		const allEntries: Record<string, Entry[]> = groupBy(
-			context.globalState.keys().map((key) => context.globalState.get(key) as Entry),
-			(entry) => entry.workspace
-		);
+			const allEntries: Record<string, Entry[]> = groupBy(
+				context.globalState.keys().map((key) => context.globalState.get(key) as Entry).filter(e => e !== null),
+				(entry) => entry.workspace
+			);
 
-		const panel = vscode.window.createWebviewPanel(
-			'time-tracking-report', // Identifies the type of the webview. Used internally
-			'Time Tracking Report', // Title of the panel displayed to the user
-			vscode.ViewColumn.One, // Editor column to show the new webview panel in.
-			{} // Webview options. More on these later.
-		);
-		panel.webview.html = genWebviewContent(allEntries);
+			const panel = vscode.window.createWebviewPanel(
+				'time-tracking-report', // Identifies the type of the webview. Used internally
+				'Time Tracking Report', // Title of the panel displayed to the user
+				vscode.ViewColumn.One, // Editor column to show the new webview panel in.
+				{} // Webview options. More on these later.
+			);
+			panel.webview.html = genWebviewContent(allEntries);
 
-	}),
-	vscode.commands.registerCommand('auto-time-tracker.openReportRaw', () => {
+		}),
+		vscode.commands.registerCommand('auto-time-tracker.openReportRaw', () => {
 
-		vscode.window.showInformationMessage("Generating Report");
+			vscode.window.showInformationMessage("Generating Report");
 
-		const allEntries: Record<string, Entry[]> = groupBy(
-			context.globalState.keys().map((key) => context.globalState.get(key) as Entry),
-			(entry) => entry.workspace
-		);
+			const allEntries: Record<string, Entry[]> = groupBy(
+				context.globalState.keys().map((key) => context.globalState.get(key) as Entry).filter(e => e !== null),
+				(entry) => entry.workspace
+			);
 
-		const panel = vscode.window.createWebviewPanel(
-			'time-tracking-report', // Identifies the type of the webview. Used internally
-			'Time Tracking Report', // Title of the panel displayed to the user
-			vscode.ViewColumn.One, // Editor column to show the new webview panel in.
-			{} // Webview options. More on these later.
-		);
-		panel.webview.html = genWebviewContentRaw(allEntries);
+			const panel = vscode.window.createWebviewPanel(
+				'time-tracking-report', // Identifies the type of the webview. Used internally
+				'Time Tracking Report', // Title of the panel displayed to the user
+				vscode.ViewColumn.One, // Editor column to show the new webview panel in.
+				{} // Webview options. More on these later.
+			);
+			panel.webview.html = genWebviewContentRaw(allEntries);
 
-	}),
-	vscode.commands.registerCommand('auto-time-tracker.openReportDetailed', () => {
+		}),
+		vscode.commands.registerCommand('auto-time-tracker.openReportDetailed', () => {
 
-		vscode.window.showInformationMessage("Generating Report");
+			vscode.window.showInformationMessage("Generating Report");
 
-		const allEntries: Record<string, Entry[]> = groupBy(
-			context.globalState.keys().map((key) => context.globalState.get(key) as Entry),
-			(entry) => entry.workspace
-		);
+			const allEntries: Record<string, Entry[]> = groupBy(
+				context.globalState.keys().map((key) => context.globalState.get(key) as Entry).filter(e => e !== null),
+				(entry) => entry.workspace
+			);
 
-		const panel = vscode.window.createWebviewPanel(
-			'time-tracking-report', // Identifies the type of the webview. Used internally
-			'Time Tracking Report', // Title of the panel displayed to the user
-			vscode.ViewColumn.One, // Editor column to show the new webview panel in.
-			{} // Webview options. More on these later.
-		);
-		panel.webview.html = genWebviewContentDetailed(allEntries);
+			const panel = vscode.window.createWebviewPanel(
+				'time-tracking-report', // Identifies the type of the webview. Used internally
+				'Time Tracking Report', // Title of the panel displayed to the user
+				vscode.ViewColumn.One, // Editor column to show the new webview panel in.
+				{} // Webview options. More on these later.
+			);
+			panel.webview.html = genWebviewContentDetailed(allEntries);
 
-	}),
+		}),
+		vscode.commands.registerCommand('auto-time-tracker.pauseTracking', () => {
+			vscode.window.showInformationMessage("Pausing tracking: " + vscode.workspace.name);
+			paused = true;
+		}),
+		vscode.commands.registerCommand('auto-time-tracker.resumeTracking', () => {
+			vscode.window.showInformationMessage("Resumed tracking: " + vscode.workspace.name);
+			paused = false;
+		}),
+		vscode.commands.registerCommand('auto-time-tracker.clearStorage', () => {
+			vscode.window
+				.showInformationMessage("Do you want to delete every entry saved?", "Yes", "No")
+				.then(answer => {
+					if (answer === "Yes") {
+						const keys = context.globalState.keys();
 
-];
+						for (const key of keys) {
+							context.globalState.update(key, undefined);
+						}
+					}
+				});
+
+		}),
+
+	];
 
 
 
@@ -91,7 +115,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let interval = setInterval(() => {
 
-		if (vscode.workspace.name !== currentWorkspace || getActiveFileName() !== activeFileName) {
+		if (paused || vscode.workspace.name !== currentWorkspace || getActiveFileName() !== activeFileName) {
 			currentWorkspace = vscode.workspace.name;
 			activeFileName = getActiveFileName();
 			workSpaceOpenedAt = new Date();
