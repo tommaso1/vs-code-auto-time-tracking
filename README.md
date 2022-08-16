@@ -2,6 +2,12 @@
 
 This extension automatically record how much time you spent on different workspaces and allows you to check a report.
 
+## Usage
+
+`npm install && npm run pack`
+
+Then add the resulting file as extension on vs code
+
 ## Motivation
 
 All existing time tracking extensions require you to manually enter a lot of information, creating some friction and bothering people trying to use them. This just does everything by itself as long as you remember to close a workspace if you are not working with it.
